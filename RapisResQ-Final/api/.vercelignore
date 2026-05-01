@@ -1,0 +1,13 @@
+# Don't build route files as separate serverless functions
+server.js
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+

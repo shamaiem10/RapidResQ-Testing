@@ -1,0 +1,444 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #f5f5f5;
+}
+
+.account-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* Header */
+.account-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.account-header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.account-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.account-logo-icon {
+  background-color: #dc2626;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: -0.3px;
+}
+
+.account-main-nav {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.account-nav-item {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 0;
+  transition: all 0.2s;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.account-nav-item:hover {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.account-nav-item.active {
+  background-color: #dc2626;
+  color: white;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 3px solid #dc2626;
+}
+
+.account-language {
+  font-size: 14px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Main Content */
+.account-main-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+/* Profile Card */
+.account-profile-card {
+  background-color: white;
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.account-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #dc2626;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.account-profile-info h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 6px;
+}
+
+.account-email {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.account-verified-badge {
+  display: inline-block;
+  background-color: #22c55e;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Section */
+.account-section {
+  background-color: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.account-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.account-section-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.account-section-icon.personal {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.account-section-icon.emergency {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.account-section-header h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.account-section-subtitle {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* Form */
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.account-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.account-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.account-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.account-input-icon {
+  position: absolute;
+  left: 16px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.account-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #1f2937;
+  background-color: #f9fafb;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.account-input.with-icon {
+  padding-left: 46px;
+}
+
+.account-input:focus {
+  outline: none;
+  border-color: #dc2626;
+  background-color: white;
+}
+
+.account-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Save Button */
+.account-save-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.account-save-btn {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  font-family: inherit;
+}
+
+.account-save-btn:hover {
+  background-color: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+}
+
+/* Floating Buttons */
+.account-floating-help-btn {
+  position: fixed;
+  bottom: 100px;
+  right: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  z-index: 50;
+}
+
+.account-floating-help-btn:hover {
+  transform: scale(1.1);
+}
+
+.account-help-icon {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.account-fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  z-index: 50;
+}
+
+.account-fab:hover {
+  transform: scale(1.1);
+}
+
+/* Lovable Badge */
+.account-lovable-badge {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1f2937;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .account-header-content {
+    padding: 12px 20px;
+  }
+
+  .account-main-content {
+    padding: 32px 20px;
+  }
+
+  .account-main-nav {
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .account-header-content {
+    flex-wrap: wrap;
+  }
+
+  .account-main-nav {
+    width: 100%;
+    order: 3;
+    padding-bottom: 4px;
+  }
+
+  .account-profile-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 32px;
+  }
+
+  .account-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+
+  .account-section {
+    padding: 24px;
+  }
+
+  .account-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .account-save-container {
+    justify-content: stretch;
+  }
+
+  .account-save-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ================= CHECKBOX FIX ================= */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}

@@ -1,0 +1,16 @@
+{
+  "name": "rapidresq",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RapidResq — emergency response web platform (React + Express API)",
+  "scripts": {
+    "install:all": "npm install --prefix web && npm install --prefix api",
+    "dev:api": "npm run dev --prefix api",
+    "dev:web": "npm start --prefix web",
+    "build:web": "npm run build --prefix web",
+    "start:api": "npm start --prefix api"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
