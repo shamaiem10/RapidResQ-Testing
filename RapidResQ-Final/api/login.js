@@ -1,4 +1,4 @@
-// Dedicated function: must run before SPA /api rewrite (see vercel.json + handle: filesystem).
+// Dedicated slim login serverless bundle — routed before /api/(.*) in vercel.json.
 const { slimLogin } = require('../backend/slimAuthApp');
 
 module.exports = slimLogin();
