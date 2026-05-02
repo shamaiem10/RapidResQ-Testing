@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Groq = require('groq-sdk');
-const dotenv = require('dotenv');
-
-dotenv.config();
 
 let groqClient = null;
+
+/** Lazy-load Groq so cold requests (e.g. /api/signup) do not parse the SDK. */
 function getGroq() {
+  const Groq = require('groq-sdk');
   const key = process.env.GROQ_API_KEY;
   if (!key) return null;
   if (!groqClient) {

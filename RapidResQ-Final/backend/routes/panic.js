@@ -8,15 +8,20 @@ const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const CommunityPost = require('../models/CommunityPost');
 
-// Configure email transporter (using Gmail as example)
-// You can use other services like SendGrid, Mailgun, etc.
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER, // Your email address
-    pass: process.env.EMAIL_PASSWORD // Your email password or app password
+let transporter = null;
+
+function getTransporter() {
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASSWORD;
+  if (!user || !pass) return null;
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass },
+    });
   }
-});
+  return transporter;
+}
 
 /**
  * Send email to all volunteers
@@ -70,6 +75,12 @@ async function sendEmailToVolunteers(postData) {
       </div>
     `;
 
+    const tp = getTransporter();
+    if (!tp) {
+      console.warn('Email not configured: set EMAIL_USER and EMAIL_PASSWORD to notify volunteers.');
+      return { totalVolunteers: volunteers.length, successCount: 0, failureCount: 0, results: [] };
+    }
+
     // Send email to each volunteer
     const emailPromises = volunteers.map(volunteer => {
       const mailOptions = {
@@ -79,7 +90,7 @@ async function sendEmailToVolunteers(postData) {
         html: emailBody
       };
 
-      return transporter.sendMail(mailOptions)
+      return tp.sendMail(mailOptions)
         .then(() => {
           console.log(`✅ Email sent to: ${volunteer.email}`);
           return { success: true, email: volunteer.email };
