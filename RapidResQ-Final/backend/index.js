@@ -19,6 +19,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Vercel can invoke this function with path /signup instead of /api/signup — normalize so routers mounted under /api match.
+app.use((req, _res, next) => {
+  const raw = req.url || '/';
+  const pathOnly = raw.split('?')[0];
+  const qs = raw.includes('?') ? raw.slice(raw.indexOf('?')) : '';
+  if (!pathOnly.startsWith('/api')) {
+    req.url = '/api' + (pathOnly === '/' ? '' : pathOnly) + qs;
+  }
+  next();
+});
+
 // Ensure DB before routes (required on cold starts)
 app.use(async (req, res, next) => {
   try {

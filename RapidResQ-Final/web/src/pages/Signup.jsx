@@ -223,7 +223,20 @@ const Signup = () => {
         }),
       });
 
-      const data = await response.json();
+      const bodyText = await response.text();
+      let data = {};
+      try {
+        data = bodyText ? JSON.parse(bodyText) : {};
+      } catch {
+        setErrors({
+          submit:
+            "Server returned a non-JSON response (often routing or deploy config). HTTP " +
+            response.status +
+            ". Redeploy the API after the latest backend fix.",
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
       if (response.ok && data.success) {
         setSuccessMessage(data.message || "Account created successfully!");
