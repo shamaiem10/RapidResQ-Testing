@@ -8,6 +8,36 @@ const connectDB = require('../config/database');
 const { validateLogin, validateSignup } = require('../utils/validation');
 const bcrypt = require('bcryptjs');
 
+const queryMaxMS = Math.max(
+  1000,
+  Number(process.env.MONGODB_QUERY_MAX_MS || (process.env.VERCEL === '1' ? 10000 : 20000)),
+);
+
+function isMongoUnavailableError(error) {
+  if (!error) return false;
+  const n = error.name;
+  const names = [
+    'MongoServerSelectionError',
+    'MongoNetworkTimeoutError',
+    'MongoTimeoutError',
+    'MongoParseError',
+  ];
+  if (names.includes(n)) return true;
+  const m = String(error.message || '');
+  return /Server selection timed out|connection.*timed out|buffering timed out|Mongo connection exceeded wall-clock|exceeded time limit|maxTimeMS/i.test(
+    m,
+  );
+}
+
+function respondMongoUnavailable(res) {
+  return res.status(503).json({
+    success: false,
+    message:
+      'Database is unavailable or blocked. Check MongoDB Atlas Network Access (allow 0.0.0.0/0), MONGO_URI on Vercel (Production), URI password encoding (@ → %40), or try Atlas non-SRV connection string.',
+    code: 'mongo_unavailable',
+  });
+}
+
 /**
  * Handle user login
  */
@@ -35,7 +65,7 @@ const loginUser = async (req, res) => {
         { username: username.trim().toLowerCase() },
         { email: username.trim().toLowerCase() }
       ]
-    });
+    }).maxTimeMS(queryMaxMS);
 
     if (!user) {
       console.log('Login failed: User not found');
@@ -92,6 +122,9 @@ const loginUser = async (req, res) => {
 
   } catch (error) {
     console.error('Login error:', error);
+    if (isMongoUnavailableError(error)) {
+      return respondMongoUnavailable(res);
+    }
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -147,7 +180,7 @@ const signupUser = async (req, res) => {
         { email: email.trim().toLowerCase() },
         { username: username.trim().toLowerCase() }
       ]
-    });
+    }).maxTimeMS(queryMaxMS);
 
     if (existingUser) {
       return res.status(409).json({
@@ -212,7 +245,11 @@ const signupUser = async (req, res) => {
 
   } catch (error) {
     console.error('Signup error:', error);
-    
+
+    if (isMongoUnavailableError(error)) {
+      return respondMongoUnavailable(res);
+    }
+
     // Handle duplicate key error
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
