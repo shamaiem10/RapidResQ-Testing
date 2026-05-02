@@ -23,7 +23,10 @@ if (!cached.listenerAttached) {
 async function connectDB() {
   const mongoURI = process.env.MONGO_URI;
 
-  if (!mongoURI) {
+  if (
+    typeof mongoURI !== 'string' ||
+    !mongoURI.trim()
+  ) {
     throw new Error(
       'MONGO_URI is not set. Add it to your environment (e.g. .env locally, Vercel Project Settings).',
     );
@@ -37,28 +40,28 @@ async function connectDB() {
     if (!cached.promise) {
       const isVercel = process.env.VERCEL === '1';
       const serverSelectionTimeoutMS = Number(
-        process.env.MONGODB_SERVER_SELECTION_MS || (isVercel ? 3500 : 5000),
+        process.env.MONGODB_SERVER_SELECTION_MS || (isVercel ? 2500 : 5000),
       );
       const connectTimeoutMS = Number(
-        process.env.MONGODB_CONNECT_TIMEOUT_MS || (isVercel ? 5000 : 7500),
+        process.env.MONGODB_CONNECT_TIMEOUT_MS || (isVercel ? 4000 : 7500),
       );
 
-      const forceIPv4 = process.env.MONGODB_FORCE_IPV4 !== '0';
       const opts = {
         serverSelectionTimeoutMS,
         connectTimeoutMS,
         socketTimeoutMS: Number(process.env.MONGODB_SOCKET_TIMEOUT_MS || 45000),
         maxPoolSize: Number(
-          process.env.MONGODB_MAX_POOL_SIZE || (isVercel ? 4 : 6),
+          process.env.MONGODB_MAX_POOL_SIZE || (isVercel ? 2 : 6),
         ),
         minPoolSize: 0,
         maxIdleTimeMS: 55000,
       };
-      if (forceIPv4) {
+      /** Opt-in IPv4 pinning only if Atlas requires it; default lets Node/Vercel pick (often fixes flaky SRV). */
+      if (process.env.MONGODB_FORCE_IPV4 === '1') {
         opts.family = 4;
       }
 
-      cached.promise = mongoose.connect(mongoURI, opts);
+      cached.promise = mongoose.connect(mongoURI.trim(), opts);
     }
     await cached.promise;
     return mongoose;
