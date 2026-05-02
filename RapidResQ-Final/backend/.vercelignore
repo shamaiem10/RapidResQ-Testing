@@ -1,0 +1,7 @@
+# Local dev server only (Lambda uses index.js via serverless-http)
+server.js
+
+node_modules
+.env
+.env.*
+*.log
