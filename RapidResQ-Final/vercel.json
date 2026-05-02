@@ -5,7 +5,12 @@
   "outputDirectory": "web/build",
   "rewrites": [
     {
-      "handle": "filesystem"
+      "source": "/api/signup",
+      "destination": "/api/signup"
+    },
+    {
+      "source": "/api/login",
+      "destination": "/api/login"
     },
     {
       "source": "/api/(.*)",
