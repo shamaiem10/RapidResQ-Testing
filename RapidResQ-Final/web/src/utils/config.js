@@ -1,4 +1,4 @@
-// API base URL for axios/fetch.
+// API base URL used by fetch (same-origin /api by default on Vercel production).
 
 const rawEnv = String(process.env.REACT_APP_API_URL || '')
   .trim()
