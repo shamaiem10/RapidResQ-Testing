@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
-import API_URL from '../utils/config';
+import { fetchApiJson } from "../utils/fetchApiJson";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const { response, data } = await fetchApiJson("login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,8 +88,6 @@ const Login = () => {
           password: formData.password,
         }),
       });
-
-      const data = await response.json();
 
       if (response.ok && data.success) {
         setSuccessMessage(data.message || "Login successful!");
@@ -133,7 +131,12 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      setErrors({ submit: "Network error. Please check your connection and try again." });
+      setErrors({
+        submit:
+          error && error.message
+            ? error.message
+            : "Request failed — open DevTools → Network tab and inspect the login request.",
+      });
     } finally {
       setIsSubmitting(false);
     }

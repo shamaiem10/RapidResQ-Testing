@@ -30,6 +30,11 @@ app.use((req, _res, next) => {
   next();
 });
 
+// Lightweight check (no Mongo) — debug routing from browser or curl: GET /api/health
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({ ok: true, service: 'rapidresq-api' });
+});
+
 // Ensure DB before routes (required on cold starts)
 app.use(async (req, res, next) => {
   try {

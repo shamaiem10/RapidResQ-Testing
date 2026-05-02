@@ -1,14 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import API_URL from '../utils/config';
+import { fetchApiJson } from "../utils/fetchApiJson";
 import "./Signup.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-
-
-// API base URL: use centralized configuration
-const API_BASE_URL = API_URL;
-
-const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -203,7 +197,7 @@ const Signup = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/signup`, {
+      const { response, data } = await fetchApiJson("signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -222,21 +216,6 @@ const Signup = () => {
           otherSkill: formData.otherSkill.trim() || null,
         }),
       });
-
-      const bodyText = await response.text();
-      let data = {};
-      try {
-        data = bodyText ? JSON.parse(bodyText) : {};
-      } catch {
-        setErrors({
-          submit:
-            "Server returned a non-JSON response (often routing or deploy config). HTTP " +
-            response.status +
-            ". Redeploy the API after the latest backend fix.",
-        });
-        setIsSubmitting(false);
-        return;
-      }
 
       if (response.ok && data.success) {
         setSuccessMessage(data.message || "Account created successfully!");
@@ -295,14 +274,9 @@ const Signup = () => {
       }
     } catch (error) {
       console.error("Signup error:", error);
-      const hint =
-        error && error.message
-          ? ` (${error.message})`
-          : "";
       setErrors({
         submit:
-          "Request failed. Remove REACT_APP_API_URL in Vercel unless it points to https (never localhost)." +
-          hint,
+          error && error.message ? error.message : "Request failed — check Network tab in DevTools.",
       });
     } finally {
       setIsSubmitting(false);
