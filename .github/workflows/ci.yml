@@ -42,3 +42,8 @@ jobs:
         env:
           CI: "false"
         run: npm ci --prefix web && npm run build --prefix web
+
+      - name: Web unit tests (smoke)
+        env:
+          CI: true
+        run: npm test --prefix web -- --watchAll=false --passWithNoTests
