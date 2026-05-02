@@ -4,8 +4,9 @@
  */
 const User = require('../models/User');
 const Login = require('../models/Login');
+const connectDB = require('../config/database');
 const { validateLogin, validateSignup } = require('../utils/validation');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 /**
  * Handle user login
@@ -25,6 +26,8 @@ const loginUser = async (req, res) => {
         errors: validation.errors
       });
     }
+
+    await connectDB();
 
     // Find user by username or email
     const user = await User.findOne({
@@ -135,6 +138,8 @@ const signupUser = async (req, res) => {
         errors: validation.errors
       });
     }
+
+    await connectDB();
 
     // Check if user already exists
     const existingUser = await User.findOne({
