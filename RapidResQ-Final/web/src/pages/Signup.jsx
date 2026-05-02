@@ -295,7 +295,15 @@ const Signup = () => {
       }
     } catch (error) {
       console.error("Signup error:", error);
-      setErrors({ submit: "Network error. Please check your connection and try again." });
+      const hint =
+        error && error.message
+          ? ` (${error.message})`
+          : "";
+      setErrors({
+        submit:
+          "Request failed. Remove REACT_APP_API_URL in Vercel unless it points to https (never localhost)." +
+          hint,
+      });
     } finally {
       setIsSubmitting(false);
     }

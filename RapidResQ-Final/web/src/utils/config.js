@@ -1,9 +1,35 @@
-// API base URL for fetch/axios.
-// - Local CRA dev: API runs on port 5000 (see backend/server.js).
-// - Vercel (single app): same-origin `/api` unless REACT_APP_API_URL overrides.
+// API base URL for axios/fetch.
 
-const API_URL =
-  process.env.REACT_APP_API_URL ||
-  (process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : '/api');
+const rawEnv = String(process.env.REACT_APP_API_URL || '')
+  .trim()
+  .replace(/\/$/, '');
+
+const pointsToLoopback =
+  !rawEnv || /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/i.test(rawEnv);
+
+function resolvedBase() {
+  const isDev = process.env.NODE_ENV === 'development';
+
+  if (isDev) {
+    if (pointsToLoopback) return 'http://localhost:5000/api';
+    return rawEnv;
+  }
+
+  // Production (Vercel / build): localhost env vars must not win — browsers block those requests.
+  if (pointsToLoopback) return '/api';
+
+  // HTTPS site + http-only API URL → blocked by the browser (“Failed to fetch”).
+  if (
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    rawEnv.startsWith('http://')
+  ) {
+    return '/api';
+  }
+
+  return rawEnv || '/api';
+}
+
+const API_URL = resolvedBase();
 
 export default API_URL;
