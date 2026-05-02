@@ -6,7 +6,6 @@ const serverless = require('serverless-http');
 const connectDB = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
-const emergencyRoutes = require('./routes/emergencyRoutes');
 
 dotenv.config();
 
@@ -68,7 +67,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 app.use('/api', authRoutes);
-app.use('/api/emergency', emergencyRoutes);
+/** Defer emergencyController (large sync module + node-fetch); not needed for signup/login. */
+app.use(
+  '/api/emergency',
+  lazyMountedRouter('./routes/emergencyRoutes', () => true),
+);
 app.use('/api', lazyMountedRouter('./routes/chat', (p) => /^\/chat(\/|$)/.test(p)));
 app.use('/api', lazyMountedRouter('./routes/panic', (p) => /^\/panic(\/|$)/.test(p)));
 app.use('/api', lazyMountedRouter('./routes/community', (p) => /^\/posts(\/|$)/.test(p)));
@@ -85,7 +88,9 @@ app.use((err, req, res, _next) => {
   console.error('Server Error:', err);
   const isMongoTimeout =
     err.name === 'MongoServerSelectionError' ||
-    /Server selection timed out/i.test(String(err.message));
+    err.name === 'MongoNetworkTimeoutError' ||
+    err.name === 'MongoTimeoutError' ||
+    /Server selection timed out|connection.*timed out|buffering timed out/i.test(String(err.message));
 
   if (isMongoTimeout && !res.headersSent) {
     return res.status(503).json({

@@ -147,8 +147,11 @@ const signupUser = async (req, res) => {
       });
     }
 
-    // Hash password
-    const saltRounds = 10;
+    // Hash password — lower rounds on Vercel (cold + bcrypt CPU can squeeze Hobby timeouts)
+    const saltRounds = Math.min(
+      14,
+      Math.max(4, Number(process.env.BCRYPT_SALT_ROUNDS || (process.env.VERCEL ? 9 : 10))),
+    );
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create new user
