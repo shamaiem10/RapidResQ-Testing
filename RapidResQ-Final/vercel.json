@@ -5,6 +5,9 @@
   "outputDirectory": "web/build",
   "rewrites": [
     {
+      "handle": "filesystem"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api"
     },
@@ -15,6 +18,16 @@
   ],
   "functions": {
     "api/index.js": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "includeFiles": "backend/**/*.js"
+    },
+    "api/signup.js": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "includeFiles": "backend/**/*.js"
+    },
+    "api/login.js": {
       "maxDuration": 60,
       "memory": 1024,
       "includeFiles": "backend/**/*.js"
