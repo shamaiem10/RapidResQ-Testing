@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { fetchApiJson } from "../utils/fetchApiJson";
 import "./Signup.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+
+const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",

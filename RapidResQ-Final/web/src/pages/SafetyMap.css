@@ -517,7 +517,7 @@ body {
   }
 
   .map-container {
-    height: 400px;
+    height: clamp(280px, min(55dvh, 55vh), 480px);
   }
 
   .service-filters {
@@ -533,15 +533,15 @@ body {
   .fab {
     width: 68px;
     height: 68px;
-    bottom: 28px;
-    right: 28px;
+    bottom: max(28px, env(safe-area-inset-bottom));
+    right: max(28px, env(safe-area-inset-right));
   }
 
   .floating-help-btn {
     width: 52px;
     height: 52px;
-    bottom: 108px;
-    right: 28px;
+    bottom: calc(104px + env(safe-area-inset-bottom));
+    right: max(28px, env(safe-area-inset-right));
   }
 }
 
@@ -549,14 +549,14 @@ body {
   .fab {
     width: 60px;
     height: 60px;
-    bottom: 1rem;
-    right: 1rem;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    right: max(1rem, env(safe-area-inset-right));
   }
 
   .floating-help-btn {
     width: 48px;
     height: 48px;
-    bottom: 88px;
-    right: 1rem;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    right: max(1rem, env(safe-area-inset-right));
   }
 }

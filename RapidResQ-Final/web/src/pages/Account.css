@@ -428,6 +428,27 @@ body {
   }
 }
 
+@media (max-width: 480px) {
+  .account-header-content {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+
+  .account-main-content {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+
+  .account-profile-card {
+    padding: clamp(20px, 5vw, 32px);
+  }
+
+  .account-section {
+    padding: 18px;
+  }
+}
+
 /* ================= CHECKBOX FIX ================= */
 .checkbox-label {
   display: flex;
