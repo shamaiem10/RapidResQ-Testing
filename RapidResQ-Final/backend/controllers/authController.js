@@ -52,23 +52,30 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Save login attempt to database
-    const loginRecord = new Login({
-      username: user.username,
-      loginTime: new Date(),
-      ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('user-agent')
-    });
-    await loginRecord.save();
+    // Persist login attempts only when useful: local/dev always; on Vercel skip the extra
+    // round-trip (saves ~latency) unless LOGIN_AUDIT=1.
+    const enableLoginAudit =
+      process.env.LOGIN_AUDIT === '1' || process.env.VERCEL !== '1';
 
-    // Print to console
-    console.log('   Login successful:');
-    console.log('   Username:', user.username);
-    console.log('   Email:', user.email);
-    console.log('   Login Time:', loginRecord.loginTime);
-    console.log('   IP Address:', loginRecord.ipAddress);
+    let responseTimestamp = new Date();
+    if (enableLoginAudit) {
+      const loginRecord = new Login({
+        username: user.username,
+        loginTime: new Date(),
+        ipAddress: req.ip || req.connection?.remoteAddress,
+        userAgent: req.get('user-agent'),
+      });
+      await loginRecord.save();
+      responseTimestamp = loginRecord.createdAt || responseTimestamp;
+      console.log('   Login successful:');
+      console.log('   Username:', user.username);
+      console.log('   Email:', user.email);
+      console.log('   Login Time:', loginRecord.loginTime);
+      console.log('   IP Address:', loginRecord.ipAddress);
+    } else {
+      console.log('   Login successful (audit skipped on serverless):', user.username);
+    }
 
-    // Return success response (exclude password)
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -76,8 +83,8 @@ const loginUser = async (req, res) => {
         username: user.username,
         email: user.email,
         fullName: user.fullName,
-        timestamp: loginRecord.createdAt
-      }
+        timestamp: responseTimestamp,
+      },
     });
 
   } catch (error) {

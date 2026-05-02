@@ -35,17 +35,22 @@ async function connectDB() {
 
   try {
     if (!cached.promise) {
+      const isVercel = process.env.VERCEL === '1';
       const serverSelectionTimeoutMS = Number(
-        process.env.MONGODB_SERVER_SELECTION_MS || 5000,
+        process.env.MONGODB_SERVER_SELECTION_MS || (isVercel ? 3500 : 5000),
       );
-      const connectTimeoutMS = Number(process.env.MONGODB_CONNECT_TIMEOUT_MS || 7500);
+      const connectTimeoutMS = Number(
+        process.env.MONGODB_CONNECT_TIMEOUT_MS || (isVercel ? 5000 : 7500),
+      );
 
       const forceIPv4 = process.env.MONGODB_FORCE_IPV4 !== '0';
       const opts = {
         serverSelectionTimeoutMS,
         connectTimeoutMS,
         socketTimeoutMS: Number(process.env.MONGODB_SOCKET_TIMEOUT_MS || 45000),
-        maxPoolSize: Number(process.env.MONGODB_MAX_POOL_SIZE || 6),
+        maxPoolSize: Number(
+          process.env.MONGODB_MAX_POOL_SIZE || (isVercel ? 4 : 6),
+        ),
         minPoolSize: 0,
         maxIdleTimeMS: 55000,
       };
