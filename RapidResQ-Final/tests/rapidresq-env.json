@@ -1,0 +1,8 @@
+{
+  "name": "RapidResQ Local",
+  "values": [
+    { "key": "baseUrl",  "value": "http://localhost:5000", "enabled": true },
+    { "key": "username", "value": "",                      "enabled": true },
+    { "key": "postId",   "value": "",                      "enabled": true }
+  ]
+}

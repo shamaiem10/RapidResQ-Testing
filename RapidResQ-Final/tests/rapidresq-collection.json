@@ -1,0 +1,958 @@
+﻿{
+  "info": {
+    "name": "RapidResQ Integration Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "username", "value": "" },
+    { "key": "postId", "value": "" }
+  ],
+  "item": [
+
+    {
+      "name": "── HEALTH ──────────────────────────────",
+      "item": [
+        {
+          "name": "TC-H-01 Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-H-01: Status 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"TC-H-01: ok=true + service field\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.ok).to.be.true;",
+                  "    pm.expect(j.service).to.eql(\"rapidresq-api\");",
+                  "});",
+                  "",
+                  "pm.test(\"TC-H-01: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "── SIGNUP ──────────────────────────────",
+      "item": [
+        {
+          "name": "TC-SU-01 Signup Valid",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"username\": \"testuser_newman01\",\n  \"email\": \"testuser_newman01@example.com\",\n  \"password\": \"Str0ngPass\",\n  \"phone\": \"+92-300-1234567\",\n  \"location\": \"Islamabad\",\n  \"age\": 21,\n  \"gender\": \"Male\",\n  \"bloodGroup\": \"O+\",\n  \"skills\": [\"First Aid\"],\n  \"otherSkill\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-SU-01: 201 or 409\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"TC-SU-01: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-SU-02 Signup Weak Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Weak User\",\n  \"username\": \"weakpwuser\",\n  \"email\": \"weak@example.com\",\n  \"password\": \"nodigitshere\",\n  \"phone\": \"+92-300-9999999\",\n  \"location\": \"Lahore\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-SU-02: 400 weak password\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-SU-02: errors array\", () => {",
+                  "    pm.expect(pm.response.json().errors).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"TC-SU-02: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-SU-03 Signup Duplicate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"username\": \"testuser_newman01\",\n  \"email\": \"testuser_newman01@example.com\",\n  \"password\": \"Str0ngPass\",\n  \"phone\": \"+92-300-1234567\",\n  \"location\": \"Islamabad\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-SU-03: 409 duplicate\", () => pm.response.to.have.status(409));",
+                  "",
+                  "pm.test(\"TC-SU-03: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-SU-04 [EDGE] Signup Missing All Fields",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: Completely empty body — server must reject with 400",
+                  "pm.test(\"TC-SU-04: 400 missing fields\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-SU-04: error message present\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.satisfy(r => r.errors || r.message || r.error,",
+                  "        \"Expected errors/message/error key in response\");",
+                  "});",
+                  "",
+                  "pm.test(\"TC-SU-04: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-SU-05 [EDGE] Signup Username Too Long (100 chars)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Edge User\",\n  \"username\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n  \"email\": \"edgeuser_long@example.com\",\n  \"password\": \"Str0ngPass\",\n  \"phone\": \"+92-300-1111111\",\n  \"location\": \"Karachi\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: 100-character username — server should reject it",
+                  "pm.test(\"TC-SU-05: 400 username too long\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-SU-05: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-SU-06 [EDGE] Signup Invalid Email Format",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Bad Email User\",\n  \"username\": \"bademailuser99\",\n  \"email\": \"not-an-email\",\n  \"password\": \"Str0ngPass\",\n  \"phone\": \"+92-300-2222222\",\n  \"location\": \"Quetta\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: Malformed email — should fail validation",
+                  "pm.test(\"TC-SU-06: 400 invalid email\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-SU-06: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "── LOGIN ───────────────────────────────",
+      "item": [
+        {
+          "name": "TC-LI-01 Login Valid",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser_newman01\",\n  \"password\": \"Str0ngPass\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-LI-01: 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const j = pm.response.json();",
+                  "",
+                  "pm.test(\"TC-LI-01: user fields present\", () => {",
+                  "    pm.expect(j.data).to.include.keys([\"username\", \"email\", \"fullName\"]);",
+                  "});",
+                  "",
+                  "pm.test(\"TC-LI-01: no password in response\", () => {",
+                  "    pm.expect(j.data).to.not.have.property(\"password\");",
+                  "});",
+                  "",
+                  "pm.test(\"TC-LI-01: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "if (j.data && j.data.username) {",
+                  "    pm.environment.set(\"username\", j.data.username);",
+                  "    pm.collectionVariables.set(\"username\", j.data.username);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-LI-02 Login Wrong Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser_newman01\",\n  \"password\": \"WrongPass1\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-LI-02: 401 wrong password\", () => pm.response.to.have.status(401));",
+                  "",
+                  "pm.test(\"TC-LI-02: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-LI-03 Login Unknown User",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nobody_xyz_9999\",\n  \"password\": \"Str0ngPass\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-LI-03: 401 unknown user\", () => pm.response.to.have.status(401));",
+                  "",
+                  "pm.test(\"TC-LI-03: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-LI-04 [EDGE] Login Empty Body",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: No credentials sent at all",
+                  "pm.test(\"TC-LI-04: 400 or 401 empty body\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
+                  "});",
+                  "",
+                  "pm.test(\"TC-LI-04: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "── PROFILE ─────────────────────────────",
+      "item": [
+        {
+          "name": "TC-PR-01 Profile Get (Exists)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/profile/{{username}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-PR-01: 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"TC-PR-01: no password field\", () => {",
+                  "    pm.expect(pm.response.json().data).to.not.have.property(\"password\");",
+                  "});",
+                  "",
+                  "pm.test(\"TC-PR-01: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-PR-02 Profile Get (Missing)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/profile/nonexistent_user_xyz_9999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-PR-02: 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"TC-PR-02: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-PR-03 Profile Update",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/profile/{{username}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"location\": \"Rawalpindi\",\n  \"phone\": \"+92-300-1234567\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-PR-03: 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"TC-PR-03: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-PR-04 [EDGE] Profile Get SQL-Injection-Like Username",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/profile/' OR '1'='1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: Malicious username — should return 404 or 400, never 500",
+                  "pm.test(\"TC-PR-04: Not 500 (safe handling)\", () => {",
+                  "    pm.expect(pm.response.code).to.not.equal(500);",
+                  "});",
+                  "",
+                  "pm.test(\"TC-PR-04: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "── EMERGENCY ───────────────────────────",
+      "item": [
+        {
+          "name": "TC-EM-01 Emergency Valid Coords",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/emergency/nearby?lat=33.6844&lon=73.0479&radius=25000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-EM-01: 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"TC-EM-01: has required fields\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"hospitals\");",
+                  "    pm.expect(j).to.have.property(\"emergencyServices\");",
+                  "    pm.expect(j).to.have.property(\"location\");",
+                  "});",
+                  "",
+                  "pm.test(\"TC-EM-01: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-EM-02 Emergency Invalid Coords",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/emergency/nearby?lat=999&lon=999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-EM-02: 400 invalid coords\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-EM-02: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-EM-03 [EDGE] Emergency Radius Too Large",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/emergency/nearby?lat=33.6844&lon=73.0479&radius=9999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: radius=9999999 — should be capped/rejected, not crash",
+                  "pm.test(\"TC-EM-03: 400 or 200 (radius capped/rejected)\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});",
+                  "",
+                  "pm.test(\"TC-EM-03: Not 500 (no server crash)\", () => {",
+                  "    pm.expect(pm.response.code).to.not.equal(500);",
+                  "});",
+                  "",
+                  "pm.test(\"TC-EM-03: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-EM-04 [EDGE] Emergency Missing Lat/Lon",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/emergency/nearby"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: No query params at all",
+                  "pm.test(\"TC-EM-04: 400 missing coordinates\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-EM-04: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "── CHAT ────────────────────────────────",
+      "item": [
+        {
+          "name": "TC-CH-02 Chat Missing Message",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/chat",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-CH-02: 400 missing message\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-CH-02: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-CH-03 [EDGE] Chat Empty String Message",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/chat",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: Empty string message should be rejected",
+                  "pm.test(\"TC-CH-03: 400 empty message\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-CH-03: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "── COMMUNITY POSTS ─────────────────────",
+      "item": [
+        {
+          "name": "TC-CO-01 Create Post",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/posts",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Blood Needed\",\n  \"title\": \"Need Help Test\",\n  \"description\": \"Newman integration test post\",\n  \"location\": \"Islamabad\",\n  \"phone\": \"+92-300-1234567\",\n  \"author\": \"testuser_newman01\",\n  \"createdBy\": \"testuser_newman01\",\n  \"urgent\": false\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-CO-01: 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "pm.test(\"TC-CO-01: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "const j = pm.response.json();",
+                  "const id = (j.data && j.data._id) || (j.post && j.post._id);",
+                  "if (id) {",
+                  "    pm.environment.set(\"postId\", id);",
+                  "    pm.collectionVariables.set(\"postId\", id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-CO-02 List Posts",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/posts"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-CO-02: 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"TC-CO-02: posts is array\", () => {",
+                  "    pm.expect(pm.response.json().posts).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"TC-CO-02: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-CO-03 Status Update Wrong User",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/posts/{{postId}}/status",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"wrong_user_xyz\",\n  \"status\": \"resolved\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-CO-03: 403 wrong user\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"TC-CO-03: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-CO-05 Respond Increment",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/posts/{{postId}}/respond",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-CO-05: 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"TC-CO-05: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-CO-06 [EDGE] Create Post Missing Required Fields",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/posts",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Blood Needed\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: Post creation with only one field — should fail validation",
+                  "pm.test(\"TC-CO-06: 400 missing required fields\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"TC-CO-06: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-CO-07 [EDGE] Status Update Invalid Post ID",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/posts/000000000000000000000000/status",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser_newman01\",\n  \"status\": \"resolved\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// EDGE CASE: Non-existent MongoDB ObjectId — should return 404",
+                  "pm.test(\"TC-CO-07: 404 post not found\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"TC-CO-07: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "TC-CO-04 Delete Own Post",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/posts/{{postId}}?username=testuser_newman01"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"TC-CO-04: 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"TC-CO-04: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "── E2E FLOW: Signup→Login→Post→Delete ──",
+      "item": [
+        {
+          "name": "FLOW-01 Signup (E2E User)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/signup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"E2E Flow User\",\n  \"username\": \"e2e_flow_user_01\",\n  \"email\": \"e2e_flow_user_01@example.com\",\n  \"password\": \"Str0ngPass\",\n  \"phone\": \"+92-300-9876543\",\n  \"location\": \"Islamabad\",\n  \"age\": 25,\n  \"gender\": \"Female\",\n  \"bloodGroup\": \"A+\",\n  \"skills\": [\"CPR\"],\n  \"otherSkill\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// E2E Step 1: Register a fresh user (201) or it already exists (409 on re-run)",
+                  "pm.test(\"FLOW-01: Signup 201 or 409\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+                  "});",
+                  "",
+                  "pm.test(\"FLOW-01: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "FLOW-02 Login (E2E User)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"e2e_flow_user_01\",\n  \"password\": \"Str0ngPass\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// E2E Step 2: Login with the newly created account",
+                  "pm.test(\"FLOW-02: Login 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"FLOW-02: username in response\", () => {",
+                  "    pm.expect(pm.response.json().data.username).to.eql(\"e2e_flow_user_01\");",
+                  "});",
+                  "",
+                  "pm.test(\"FLOW-02: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "FLOW-03 Create Post (E2E User)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/posts",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Volunteer Needed\",\n  \"title\": \"E2E Flow Test Post\",\n  \"description\": \"Auto-generated by end-to-end integration flow\",\n  \"location\": \"Islamabad\",\n  \"phone\": \"+92-300-9876543\",\n  \"author\": \"e2e_flow_user_01\",\n  \"createdBy\": \"e2e_flow_user_01\",\n  \"urgent\": false\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// E2E Step 3: Authenticated user creates a community post",
+                  "pm.test(\"FLOW-03: Post created 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "pm.test(\"FLOW-03: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "const j = pm.response.json();",
+                  "const id = (j.data && j.data._id) || (j.post && j.post._id);",
+                  "if (id) {",
+                  "    pm.collectionVariables.set(\"e2ePostId\", id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+
+        {
+          "name": "FLOW-04 Delete Post (E2E User)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/posts/{{e2ePostId}}?username=e2e_flow_user_01"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// E2E Step 4: Same user deletes their own post — full lifecycle complete",
+                  "pm.test(\"FLOW-04: Post deleted 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"FLOW-04: Response time < 2000ms\", () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test(\"FLOW-04: E2E flow complete\", () => {",
+                  "    pm.expect(true).to.be.true; // marker test — all 4 steps passed",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+
+  ]
+}

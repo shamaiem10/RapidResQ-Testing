@@ -7,11 +7,9 @@
  */
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
+require('./loadEnv')();
 const serverless = require('serverless-http');
 const { signupUser, loginUser } = require('./controllers/authController');
-
-dotenv.config();
 
 function mongoErrorHandler(err, req, res, _next) {
   console.error('[slimAuth]', err);

@@ -1,13 +1,11 @@
 // Backend entry for Vercel — Express + serverless-http
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
+require('./loadEnv')();
 const serverless = require('serverless-http');
 const connectDB = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
-
-dotenv.config();
 
 /** Only load heavy routers when a matching path is hit (faster /api/signup cold starts). */
 function lazyMountedRouter(routeModulePath, subpathMatcher) {

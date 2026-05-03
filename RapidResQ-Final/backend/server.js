@@ -1,7 +1,7 @@
 // api/server.js — local development server (not used on Vercel)
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
+require('./loadEnv')();
 const connectDB = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
@@ -9,8 +9,6 @@ const emergencyRoutes = require('./routes/emergencyRoutes');
 const chatRoutes = require('./routes/chat');
 const communityRoutes = require('./routes/community');
 const panicRoutes = require('./routes/panic');
-
-dotenv.config();
 
 const app = express();
 
@@ -29,6 +27,9 @@ app.use('/api', chatRoutes);
 app.use('/api', communityRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api', panicRoutes);
+
+// ✅ ADDED — Health check route for integration testing
+app.get('/api/health', (req, res) => res.json({ ok: true, service: 'rapidresq-api' }));
 
 app.use((req, res) => {
   res.status(404).json({
